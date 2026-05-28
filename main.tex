@@ -1,0 +1,41 @@
+\documentclass[hyphens,aspectratio=169,dvipsnames]{beamer}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{minted}
+\usetheme{Berlin}
+\usecolortheme[RGB={0,95,47}]{structure}
+\beamertemplatenavigationsymbolsempty
+
+\makeatletter
+\AtBeginEnvironment{minted}{\dontdofcolorbox}
+\def\dontdofcolorbox{\renewcommand\fcolorbox[4][]{##4}}
+\makeatother
+
+\begin{document}
+
+\begin{frame}[fragile]{\texttt{curl}}
+    \begin{itemize}
+        \pause \item \texttt{curl} is a command-line tool for speaking various network protocols.
+        \pause \item We have it installed on plink.
+        \pause \item Example!
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{HTTP}
+    \begin{itemize}
+        \pause \item \texttt{curl} speaks many protocols, but nearest to my heart is HTTP :)
+        \pause \item You can use \texttt{curl} to make HTTP requests by giving it a URL on \texttt{argv}.
+        \pause \item \texttt{curl http://example.com}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{What is a URL?}
+    \begin{itemize}
+        \pause \item What does a URL do?
+        \pause \item What are the pieces of a URL? (Whiteboard)
+    \end{itemize}
+\end{frame}
+
+\end{document}

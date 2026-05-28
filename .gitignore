@@ -1,0 +1,9 @@
+*.log
+*.aux
+*.out
+*.snm
+*.toc
+*.vrb
+*.pdf
+*.nav
+fricked_up_curl
