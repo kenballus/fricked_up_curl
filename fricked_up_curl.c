@@ -22,7 +22,7 @@
 #include <strings.h> // for strcasecmp
 #include <sys/types.h> // for ssize_t
 #include <netdb.h> // for getaddrinfo, freeaddrinfo
-#include <sys/socket.h> // for AF_INET, SOCK_STREAM, socket, shutdown, SHUT_WR, connect
+#include <sys/socket.h> // for AF_INET, SOCK_STREAM, socket, connect
 #include <unistd.h> // for write, close, STDOUT_FILENO
 #include <string.h> // for strlen
 #include <arpa/inet.h> // for htons
@@ -156,14 +156,12 @@ void send_http_request(struct url const url) {
     static char const req_prefix[] = "GET /";
     write_all(sock, req_prefix, sizeof(req_prefix) - 1);
     write_all(sock, url.path, strlen(url.path));
-    static char const req_middle[] = " HTTP/1.1\r\nHost: ";
+    static char const req_middle[] = " HTTP/1.1\r\nConnection: close\r\nHost: ";
     write_all(sock, req_middle, sizeof(req_middle) - 1);
     write_all(sock, url.hostname, strlen(url.hostname));
     static char const req_end[] = "\r\n\r\n";
     write_all(sock, req_end, sizeof(req_end) - 1);
     
-    shutdown(sock, SHUT_WR);
- 
     while (true) {
         char c;
         if (read(sock, &c, 1) != 1) {
