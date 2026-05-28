@@ -180,7 +180,7 @@ int main(int const argc, char const *const *const argv) {
     if (argc == 0) {
         fprintf(stderr, "How did you even do this??\n");
         return EXIT_FAILURE;
-    } else if (argc != 1) {
+    } else if (argc != 2) {
         fprintf(stderr, "Usage: %s <file_with_some_urls>\n", argv[0]);
         return EXIT_FAILURE;
     }
