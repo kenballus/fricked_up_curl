@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -g -std=c23 -Wall -Wextra -Wpedantic -Wvla -Wshadow # -fsanitize=address,undefined
+CFLAGS := -g -std=c17 -Wall -Wextra -Wpedantic -Wvla -Wshadow # -fsanitize=address,undefined -fno-sanitize-recover=all
 
 fricked_up_curl: fricked_up_curl.c
 	$(CC) $(CFLAGS) $^ -o $@

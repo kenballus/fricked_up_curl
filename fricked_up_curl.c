@@ -16,16 +16,16 @@
 // all the answers :)
 
 #define _GNU_SOURCE
-#include <stdio.h> // for stderr, fprintf, getline
-#include <stdlib.h> // for EXIT_FAILURE, exit
-#include <stddef.h> // for size_t
-#include <strings.h> // for strcasecmp
-#include <sys/types.h> // for ssize_t
-#include <netdb.h> // for getaddrinfo, freeaddrinfo
+#include <arpa/inet.h>  // for htons
+#include <netdb.h>      // for getaddrinfo, freeaddrinfo
+#include <stddef.h>     // for size_t
+#include <stdio.h>      // for stderr, fprintf, getline
+#include <stdlib.h>     // for EXIT_FAILURE, exit
+#include <string.h>     // for strlen
+#include <strings.h>    // for strcasecmp
 #include <sys/socket.h> // for AF_INET, SOCK_STREAM, socket, connect
-#include <unistd.h> // for write, close, STDOUT_FILENO
-#include <string.h> // for strlen
-#include <arpa/inet.h> // for htons
+#include <sys/types.h>  // for ssize_t
+#include <unistd.h>     // for write, close, STDOUT_FILENO
 
 struct url {
     char *scheme;
@@ -35,75 +35,76 @@ struct url {
 };
 
 struct url parse_url(char *const url) {
-        // Here's the plan:
-        // We want to break up this URL into 3 parts:
-        // - scheme   (the "http" in "http://example.com/cool_path")
-        // - hostname (the "example.com" in "http://example.com/cool_path")
-        // - path     (the "/cool_path" in "http://example.com/cool_path")
-        // Along the way, we also want to collect a port number, if there is one.
+    // Here's the plan:
+    // We want to break up this URL into 3 parts:
+    // - scheme   (the "http" in "http://example.com/cool_path")
+    // - hostname (the "example.com" in "http://example.com/cool_path")
+    // - path     (the "/cool_path" in "http://example.com/cool_path")
+    // Along the way, we also want to collect a port number, if there is one.
 
-        // As we parse through the string, we'll drop null bytes into the middle of it,
-        // thereby separating it into these 3 components.
+    // As we parse through the string, we'll drop null bytes into the middle of
+    // it, thereby separating it into these 3 components.
 
-        // Find the ':' that delimits the scheme
-        size_t colon_idx = 0;
-        while (url[colon_idx] != ':') {
-            colon_idx++;
+    // Find the ':' that delimits the scheme
+    size_t colon_idx = 0;
+    while (url[colon_idx] != ':') {
+        colon_idx++;
+    }
+
+    // Replace it with a null byte,
+    // so we can treat the scheme as
+    // its own string
+    url[colon_idx] = '\0';
+    char *const scheme = url;
+
+    // Now, we find the hostname and port
+
+    // Find the end of the hostname
+    char *const hostname =
+        url + colon_idx + 1 /* for the '\0' */ + 2 /* for the "//" */;
+    size_t end_of_hostname_idx = 0;
+    while (hostname[end_of_hostname_idx] != '\0' &&
+           hostname[end_of_hostname_idx] != ':' &&
+           hostname[end_of_hostname_idx] != '/') {
+        end_of_hostname_idx++;
+    }
+
+    // After the hostname is either a path, a port number (maybe followed by a
+    // path), or nothing Handle the three cases separately.
+    int port;
+    char *path;
+    if (hostname[end_of_hostname_idx] == '\0') {
+        // Nothing. Easy
+        port = 80;
+        path = hostname + end_of_hostname_idx;
+    } else if (hostname[end_of_hostname_idx] == '/') {
+        // Path
+        hostname[end_of_hostname_idx] = '\0'; // null out the '/'
+        port = 80;
+        path = hostname + end_of_hostname_idx + 1; // skip the null byte
+    } else {
+        // Port number
+        hostname[end_of_hostname_idx] = '\0'; // null out the ':'
+        char *port_str =
+            hostname + end_of_hostname_idx + 1; // skip the null byte
+        port = 0;
+        size_t end_of_port_idx = 0;
+        while (port_str[end_of_port_idx] != '\0' &&
+               port_str[end_of_port_idx] != '/') {
+            port *= 10;
+            port += port_str[end_of_port_idx] - '0';
+            end_of_port_idx++;
         }
-
-        // Replace it with a null byte,
-        // so we can treat the scheme as
-        // its own string
-        url[colon_idx] = '\0';
-        char *const scheme = url;
-
-        // Now, we find the hostname and port
-
-        // Find the end of the hostname
-        char *const hostname = url + colon_idx + 1 /* for the '\0' */ + 2 /* for the "//" */;
-        size_t end_of_hostname_idx = 0;
-        while (hostname[end_of_hostname_idx] != '\0' && hostname[end_of_hostname_idx] != ':' && hostname[end_of_hostname_idx] != '/') {
-            end_of_hostname_idx++;
-        }
-
-        // After the hostname is either a path, a port number (maybe followed by a path), or nothing
-        // Handle the three cases separately.
-        int port;
-        char *path;
-        if (hostname[end_of_hostname_idx] == '\0') {
-            // Nothing. Easy
-            port = 80;
-            path = hostname + end_of_hostname_idx;
-        } else if (hostname[end_of_hostname_idx] == '/') {
+        if (port_str[end_of_port_idx] == '/') {
             // Path
-            hostname[end_of_hostname_idx] = '\0'; // null out the '/'
-            port = 80;
-            path = hostname + end_of_hostname_idx + 1; // skip the null byte
+            path = port_str + end_of_port_idx + 1;
         } else {
-            // Port number
-            hostname[end_of_hostname_idx] = '\0'; // null out the ':'
-            char *port_str = hostname + end_of_hostname_idx + 1; // skip the null byte
-            port = 0;
-            size_t end_of_port_idx = 0;
-            while (port_str[end_of_port_idx] != '\0' && port_str[end_of_port_idx] != '/') {
-                port *= 10;
-                port += port_str[end_of_port_idx] - '0';
-                end_of_port_idx++;
-            }
-            if (port_str[end_of_port_idx] == '/') {
-                // Path
-                path = port_str + end_of_port_idx + 1;
-            } else {
-                // Nothing!
-                path = port_str + end_of_port_idx;
-            }
+            // Nothing!
+            path = port_str + end_of_port_idx;
         }
-        return (struct url){
-            .scheme = scheme,
-            .hostname = hostname,
-            .port = port,
-            .path = path
-        };
+    }
+    return (struct url){
+        .scheme = scheme, .hostname = hostname, .port = port, .path = path};
 }
 
 void write_all(int const fd, char const *data, size_t len) {
@@ -126,20 +127,20 @@ void send_http_request(struct url const url) {
     // (But if you're curious and we have time I can explain it to you)
 
     // Do a DNS lookup for the hostname
-    struct addrinfo hints = (struct addrinfo){
-        .ai_family = AF_INET,
-        .ai_socktype = SOCK_STREAM,
-        .ai_protocol = 0,
-        .ai_flags = 0
-    };
+    struct addrinfo hints = (struct addrinfo){.ai_family = AF_INET,
+                                              .ai_socktype = SOCK_STREAM,
+                                              .ai_protocol = 0,
+                                              .ai_flags = 0};
     struct addrinfo *dns_lookup_result;
-    int const gai_rc = getaddrinfo(url.hostname, NULL, &hints, &dns_lookup_result);
+    int const gai_rc =
+        getaddrinfo(url.hostname, NULL, &hints, &dns_lookup_result);
     if (gai_rc) {
         fprintf(stderr, "DNS lookup failed!\n");
         exit(EXIT_FAILURE);
     }
 
-    struct sockaddr_in *ipaddr = (struct sockaddr_in *)(dns_lookup_result->ai_addr);
+    struct sockaddr_in *ipaddr =
+        (struct sockaddr_in *)(dns_lookup_result->ai_addr);
 
     ipaddr->sin_port = htons((uint16_t)url.port);
 
@@ -161,8 +162,8 @@ void send_http_request(struct url const url) {
     write_all(sock, url.hostname, strlen(url.hostname));
     static char const req_end[] = "\r\n\r\n";
     write_all(sock, req_end, sizeof(req_end) - 1);
-    
-    while (true) {
+
+    while (1) {
         char c;
         if (read(sock, &c, 1) != 1) {
             break;
@@ -185,7 +186,7 @@ int main(int const argc, char const *const *const argv) {
 
     FILE *const url_file = fopen(argv[1], "r");
 
-    while (true) {
+    while (1) {
         // Read a line from the file
         char *line = NULL;
         size_t allocation_size;

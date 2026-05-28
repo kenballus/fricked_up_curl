@@ -19,7 +19,7 @@
     \begin{itemize}
         \pause \item \texttt{curl} is a command-line tool for speaking various network protocols.
         \pause \item We have it installed on plink.
-        \pause \item Example!
+        \pause \item (Example!)
     \end{itemize}
 \end{frame}
 
@@ -31,11 +31,81 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{What is a URL?}
+\begin{frame}[fragile]{what is a URL?}
     \begin{itemize}
         \pause \item What does a URL do?
         \pause \item What are the pieces of a URL? (Whiteboard)
     \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{fricked\_up\_curl}}
+    \begin{itemize}
+        \pause \item \texttt{fricked\_up\_curl} is a \texttt{curl} clone that I wrote last night.
+        \pause \item It does \textit{kinda} the same thing as \texttt{curl}, but it reads URLs from a file instead of \texttt{argv}.
+        \pause \item It also has bugs :)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{activity \#1: find bugs by hand}
+    \begin{itemize}
+        \pause \item (Hand out source code)
+        \pause \item You have 20 minutes to stare at this code and find as many bugs as you can, \textbf{by hand}.
+        \pause \item (Sidebar conversation topic: "What is a bug?")
+        \pause \item Feel free to consult the man pages, and run little test programs, but \textbf{don't use any other external resources}.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{activity \#1 findings}
+    (Whiteboard)
+\end{frame}
+
+\begin{frame}[fragile]{fuzzing}
+    \begin{itemize}
+        \pause \item How might we automate the process of finding bugs? (Whiteboard)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{a simple fuzzing algorithm}
+    \begin{enumerate}
+        \pause \item generate an input
+        \pause \item give it to the program under test (PUT)
+        \pause \item if it crashes, save the input as a result
+        \pause \item goto 1
+    \end{enumerate}
+
+    \begin{itemize}
+        \pause \item This is known as a ``black box" fuzzing algorithm, because the only information collected from the PUT is whether it crashed.
+        \pause \item What are some flaws with this approach?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{a better fuzzing algorithm}
+    \begin{enumerate}
+        \pause \item begin with a few starting inputs (a ``corpus")
+        \pause \item pick one of them
+        \pause \item mutate it (add/remove/replace/increment/decrement bytes, flip bits, etc.)
+        \pause \item give it to the program under test (PUT)
+        \pause \item if it crashes, save the input as a result
+        \pause \item otherwise, collect ``feedback" from the PUT
+        \pause \item if the feedback is ``interesting," add this mutated input to the corpus
+        \pause \item goto 2
+    \end{enumerate}
+
+    \begin{itemize}
+        \pause \item This is known as a ``grey box" fuzzing algorithm, because we're collecting feedback from the PUT to inform input selection.
+        \pause \item This is known as a ``generational" or ``evolutionary" fuzzing algorithm because inputs are mutated, then selected for survival (addition to the corpus) based on an evaluation of fitness (whether the feedback is interesting).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{coverage}
+    \begin{itemize}
+        \pause \item There are many kinds of feedback that fuzzers use, but the most popular is ``control-flow edge coverage."
+        \pause \item (Whiteboard)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{activity \#2: AFL++}
+    (Handout)
 \end{frame}
 
 \end{document}
