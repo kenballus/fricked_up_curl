@@ -7,6 +7,9 @@ fricked_up_curl: fricked_up_curl.c
 main.pdf: main.tex
 	lualatex $^
 
+afl.pdf: afl.md
+	pandoc -i $^ -o $@
+
 .PHONY: clean
 clean:
-	rm -f fricked_up_curl main.pdf main.aux main.log main.nav main.out main.snm main.toc main.vrb
+	rm -f fricked_up_curl main.pdf main.aux main.log main.nav main.out main.snm main.toc main.vrb afl.pdf

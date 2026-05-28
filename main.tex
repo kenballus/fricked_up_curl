@@ -55,13 +55,24 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{activity \#1 findings}
-    (Whiteboard)
+\begin{frame}[fragile]{activity \#1 continued: are your bugs even real?}
+    \begin{itemize}
+        \pause \item SSH to \texttt{plink}, then \texttt{git clone https://github.com/kenballus/fricked\_up\_curl}
+        \pause \item Run \texttt{make}, then test your bug hypotheses by doing the following for each bug:
+            \begin{enumerate}
+                \pause \item make a file containing a URL that would trigger the bug
+                \pause \item run \texttt{fricked\_up\_curl} on that file
+            \end{enumerate}
+        \pause \item \texttt{./fricked\_up\_curl <(echo -n http://example.com/who/even/cares)}
+        \pause \item Were all of your bugs real? Did the program's behavior surprise you? Discuss with your group and course staff.
+        \pause \item (10 minutes)
+    \end{itemize}
 \end{frame}
+
 
 \begin{frame}[fragile]{fuzzing}
     \begin{itemize}
-        \pause \item How might we automate the process of finding bugs? (Whiteboard)
+        \pause \item How might we automate the process of finding bugs?
     \end{itemize}
 \end{frame}
 
