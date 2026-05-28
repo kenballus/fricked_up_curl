@@ -70,7 +70,7 @@ struct url parse_url(char *const url) {
     }
 
     // After the hostname is either a path, a port number (maybe followed by a
-    // path), or nothing Handle the three cases separately.
+    // path), or nothing. Handle the three cases separately.
     int port;
     char *path;
     if (hostname[end_of_hostname_idx] == '\0') {
@@ -126,7 +126,6 @@ void send_http_request(struct url const url) {
     // (I'm serious)
     // (But if you're curious and we have time I can explain it to you)
 
-    // Do a DNS lookup for the hostname
     struct addrinfo hints = (struct addrinfo){.ai_family = AF_INET,
                                               .ai_socktype = SOCK_STREAM,
                                               .ai_protocol = 0,
