@@ -167,7 +167,7 @@ void send_http_request(struct url const url) {
         if (read(sock, &c, 1) != 1) {
             break;
         }
-        write(STDOUT_FILENO, &c, 1);
+        write_all(STDOUT_FILENO, &c, 1);
     }
 
     close(sock);
